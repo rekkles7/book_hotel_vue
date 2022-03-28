@@ -21,7 +21,7 @@
         <el-header style="text-align: right">
           <el-dropdown>
             <i class="el-icon-setting" style="margin-right: 15px"></i>
-            <span>Jeff</span>
+            <span>{{adminName}}</span>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item>个人信息</el-dropdown-item>
               <el-dropdown-item @click.prevent.native="logout">退出登录</el-dropdown-item>
@@ -49,9 +49,8 @@ export default {
   },
   methods: {
     getMenus() {
-      this.$request.get('http://localhost:8000/api/menus/build').then(res => {
+      this.$request.get('api/menus/build').then(res => {
         this.menuList = res.data
-        console.log(this.menuList);
       })
     },
     logout() {
@@ -63,39 +62,18 @@ export default {
       this.$router.replace(path1 + '/' + path2).catch(err=>err)
     }
   },
+  computed: {
+    adminName: {
+      get(){
+        return this.$store.getters.getUserName
+      },
+    }
+  },
   data() {
     return {
-      tableData: [{
-        date: '2016-05-03',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        date: '2016-05-02',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        date: '2016-05-04',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        date: '2016-05-01',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        date: '2016-05-08',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        date: '2016-05-06',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        date: '2016-05-07',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }],
+      tableData: [],
       multipleSelection: [],
-      menuList: []
+      menuList: [],
     }
   }
 }

@@ -3,7 +3,7 @@
   <div class="login" :style="'background-image:url('+ Background +');'">
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" label-position="left" label-width="0px" class="login-form">
       <h3 class="title">
-        EL-ADMIN 后台管理系统
+        酒店后台管理系统
       </h3>
       <el-form-item prop="username">
         <el-input v-model="loginForm.username" type="text" auto-complete="off" placeholder="账号">
@@ -123,8 +123,7 @@ export default {
           this.loading = true
           // this.$request.post('http://localhost:8000/auth/login',user)
           this.$store.dispatch('Login', user).then(res=>{
-            // setToken(res.data.token, this.loginForm.rememberMe)
-            console.log('登陆了')
+            // console.log(this.$store.state.userName)
             this.$router.push('/')
           }).catch(()=>{
             this.loading = false

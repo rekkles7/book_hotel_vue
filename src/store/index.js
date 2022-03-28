@@ -10,7 +10,9 @@ export default new Vuex.Store({
         operation: '',
         token: getToken(),
         user: {},
-        roles: []
+        roles: [],
+        userId: '',
+        userName: ''
     },
     mutations: {
         SET_OP: (state, payload) => {
@@ -24,6 +26,12 @@ export default new Vuex.Store({
         },
         SET_ROLES: (state, roles) => {
             state.roles = roles
+        },
+        SET_USERID: (state, roles) => {
+            state.userId = roles
+        },
+        SET_USERNAME: (state, roles) => {
+            state.userName = roles
         }
     },
     actions: {
@@ -33,6 +41,10 @@ export default new Vuex.Store({
             return new Promise((resolve, reject) => {
                 login(userInfo.username, userInfo.password, userInfo.code, userInfo.uuid).then(res => {
                     setToken(res.data.token, rememberMe)
+                    commit('SET_USERNAME',res.data.user.admin.username)
+                    commit('SET_USERID',res.data.user.admin.id)
+                    window.localStorage.setItem('userId', JSON.stringify(res.data.user.admin.id))
+                    window.localStorage.setItem('userName', JSON.stringify(res.data.user.admin.username))
                     commit('SET_TOKEN', res.data.token)
                     setUserInfo(res.data.user, commit)
                     resolve()
@@ -68,10 +80,23 @@ export default new Vuex.Store({
         }
     },
     getters: {
+        getUserId: state => {
+            let userId = state.userId
+            if (!userId) {
+                userId = JSON.parse(window.localStorage.getItem('userId') || null)
+            }
+            return userId
+        },
+        getUserName: state => {
+            let userName = state.userName
+            if (!userName) {
+                userName = JSON.parse(window.localStorage.getItem('userName') || null)
+            }
+            return userName
+        },
     }
 
 })
-
 
 const logOut = (commit) => {
     commit('SET_TOKEN', '')

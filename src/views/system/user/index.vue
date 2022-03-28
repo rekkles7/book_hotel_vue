@@ -121,33 +121,10 @@
           width="200">
       </el-table-column>
       <el-table-column
-          prop="dept.name"
-          label="部门"
-          width="120">
-      </el-table-column>
-      <el-table-column
-          prop="enabled"
-          label="状态"
-          width="120">
-        <template slot-scope="scope">
-          <el-switch ref="enabled"
-                     v-model="scope.row.enabled"></el-switch>
-        </template>
-      </el-table-column>
-      <el-table-column
           :show-overflow-tooltip="true"
           prop="createTime"
           label="创建日期"
           width="200">
-      </el-table-column>
-      <el-table-column
-          prop="operation"
-          label="操作"
-          width="120">
-        <template slot-scope="scope">
-          <el-button type="text" size="small">Edit</el-button>
-          <el-button type="text" size="small">Delete</el-button>
-        </template>
       </el-table-column>
     </el-table>
 
@@ -171,34 +148,6 @@
             <el-radio label="男">男</el-radio>
             <el-radio label="女">女</el-radio>
           </el-radio-group>
-        </el-form-item>
-        <el-form-item label="状态">
-          <el-radio-group v-model="form.enabled">
-            <el-radio
-                v-for="item in user_status"
-                :label="item.value"
-            >{{ item.label }}
-            </el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="部门">
-          <el-select v-model="deptData" placeholder="请选择部门" ref="deptSelect">
-            <el-option v-model="deptData" style="height: max-content;width: 100%;padding: 0">
-              <el-tree
-                  :props="props"
-                  :load="loadDept"
-                  lazy
-                  style="width: 100%"
-                  @node-click="setDept">
-              </el-tree>
-            </el-option>
-
-          </el-select>
-        </el-form-item>
-        <el-form-item label="岗位">
-          <el-select v-model="jobDatas" multiple placeholder="请选择岗位" @change="changeJob">
-            <el-option v-for="item in jobs" :label="item.name" :value="item.id" :key="item.id"></el-option>
-          </el-select>
         </el-form-item>
         <el-form-item label="角色" prop="roles">
           <el-select
@@ -235,7 +184,6 @@ export default {
   created() {
     this.getUserInfo()
     store.dispatch('GetInfo').then(() => {
-      console.log('获取用户信息成功！！！！')
       this.optShow = {
         add: true,
         edit: true,
@@ -257,37 +205,30 @@ export default {
         children: 'zones',
         isLeaf: 'leaf',
       },
-      jobs: [],
       roles: [],
-      deptData: {},
-      depts: [],
       dialogFormVisible: false,
       tableData: [],
       form: {
         //以下是示例数据，可以删除
         username: 'testJeff520',
         email: '786500545@qq.com',
-        dept: {id: 7},
         nickName: 'houky',
         id: null,
         phone: 13242842112,
         roles: [{id: 2}],
         enabled: true,
         gender: '男',
-        jobs: [],
         //以下是修改用户信息才需要传给后端的，新增的时候不用
-        createTime: "2021-08-17 20:00:35",
-        createBy: "admin",
-        updateTime: "2021-08-17 20:05:45"
+        // createTime: "2021-08-17 20:00:35",
+        // createBy: "admin",
+        // updateTime: "2021-08-17 20:05:45"
       }
     }
   },
   methods: {
     //让选中的数据显示到框框里面
     mapForm(selectRow) {
-      this.deptData = selectRow.dept.name
       this.roleDatas = selectRow.roles.map(value => value.id)
-      this.jobDatas = selectRow.jobs.map(value => value.id)
       this.form = selectRow
     },
     //选中某一行时
@@ -298,7 +239,8 @@ export default {
     updateUser(data) {
       let op = this.$store.state.operation
       console.log("提交给后端/api/users接口的数据", data)
-      this.$request({url: 'http://localhost:8000/api/users', method: op, data: data}).then(res => {
+      console.log(op)
+      this.$request({url: 'api/users', method: op, data: data}).then(res => {
         console.log(op + '用户成功')
         Element.Message.success("操作成功")
         this.dialogFormVisible = false
@@ -311,48 +253,24 @@ export default {
         return {id: value}
       })
     },
-
-    //由于select组件绑定的Jobs里面只有数字组成的数组[1,2,3]，而不是对象如[{id:1},{id:2}]，需要进行转化
-    changeJob() {
-      this.form.jobs = this.jobDatas.map(value => {
-        return {id: value}
-      })
-    },
-    //点击部门后，改变部门框显示的值
-    setDept(node) {
-      this.form.dept = {id: node.id}
-      this.deptData = node.name
-      this.$refs.deptSelect.visible = false
-    },
-    // 获取弹窗内部门数据，树形组件的节点信息获取
-    loadDept(node, resolve) {
-      //pid代表上级部门的id
-      let pid = node.level === 0 ? null : node.data.id
-      this.$request.get('http://localhost:8000/api/dept', {params: {enable: true, pid}}).then(res => {
-        this.depts = res.data.content
-        resolve(this.depts);
-      })
-    },
     //点击新增、编辑、删除按钮时
     updateOperation(op) {
+      console.log(op)
       if (op === 'put') this.mapForm(this.selectData[0])
       this.$store.commit('SET_OP', op)
       console.log(this.form)
       this.dialogFormVisible = op !== 'delete'
-      if (op !== 'delete') this.getJobAndRole()
+      if (op !== 'delete') this.getRole()
       else this.updateUser(this.selectData.map(value => value.id))
     },
     //获取树形组件中的岗位和角色信息
-    getJobAndRole() {
-      this.$request.get('http://localhost:8000/api/job?page=0&size=9999&enabled=true').then(res => {
-        this.jobs = res.data.content
-      })
-      this.$request.get('http://localhost:8000/api/roles/all').then(res => {
+    getRole() {
+      this.$request.get('api/roles/all').then(res => {
         this.roles = res.data
       })
     },
     getUserInfo() {
-      this.$request.get('http://localhost:8000/api/users').then(res => {
+      this.$request.get('api/users').then(res => {
         this.tableData = res.data.content
       })
     }

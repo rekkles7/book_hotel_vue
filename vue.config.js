@@ -27,6 +27,20 @@ module.exports = {
                 pathRewrite: {
                     '^/auth': 'auth'
                 }
+            },
+            '/user': {
+                target: process.env.VUE_APP_BASE_API,
+                changeOrigin: true,
+                pathRewrite: {
+                    '^/user': 'user'
+                }
+            },
+            '/admin': {
+                target: process.env.VUE_APP_BASE_API,
+                changeOrigin: true,
+                pathRewrite: {
+                    '^/admin': 'admin'
+                }
             }
         }
     },
