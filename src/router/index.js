@@ -5,6 +5,7 @@ import User from "@/views/system/user";
 import {getToken} from "@/utils/auth";
 import Hotel from "@/views/system/hotel"
 import Room from "@/views/system/room"
+import Order from "@/views/system/order"
 Vue.use(VueRouter)
 
 const routes = [
@@ -33,6 +34,11 @@ const routes = [
         path: 'system/room',
         name: 'Room',
         component: Room
+      },
+      {
+        path: 'system/order',
+        name: 'Order',
+        component: Order
       }
     ]
   }
